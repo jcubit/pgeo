@@ -14,6 +14,16 @@ add_executable(pgeoTest)
 
 target_sources(pgeoTest PRIVATE
         TestMain.cpp
+        test_matrix.cpp
+        utilities.h
 )
 
-target_link_libraries(pgeoTest PRIVATE GTest::gtest_main)
+#target_link_libraries(pgeoTest PRIVATE GTest::gtest_main )
+
+target_link_libraries(pgeoTest
+        PRIVATE
+        pgeo
+        GTest::gtest_main
+        GTest::gtest
+        spdlog::spdlog
+        )
