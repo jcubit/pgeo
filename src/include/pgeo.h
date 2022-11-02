@@ -13,6 +13,7 @@ namespace stdex = std::experimental;
 #include "pgeo/PrivateSupport.h"
 #include "pgeo/Matrix.h"
 #include "pgeo/MatrixEngine.h"
+#include "pgeo/Addition.h"
 
 
 

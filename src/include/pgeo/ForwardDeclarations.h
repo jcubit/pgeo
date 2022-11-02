@@ -23,6 +23,9 @@ namespace pgeo {
     template <typename T>
     using Mat22 = Mat<T, 2, 2>;
 
+    template <typename T>
+    using Mat33 = Mat<T, 3, 3>;
+
 
 } // namespace pgeo
 

@@ -203,6 +203,20 @@ namespace pgeo {
         engine_.swapRows(row1,row2);
     }
 
+    // -------------- Equality Comparison ------------------------------------------------------
+
+    template <typename ET1, typename ET2>
+    constexpr bool operator==(Matrix<ET1> const& lhs, Matrix<ET2> const& rhs)
+    {
+    	return detail::matrixComparisonEquality(lhs.engine(), rhs.engine());
+    }
+
+    template <typename ET1, typename ET2>
+    constexpr bool operator!=(Matrix<ET1> const& lhs, Matrix<ET2> const& rhs)
+    {
+    	return !detail::matrixComparisonEquality(lhs.engine(), rhs.engine());
+    }
+
 
 } // namespace pgeo
 

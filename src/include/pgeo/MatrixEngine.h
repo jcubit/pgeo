@@ -187,16 +187,16 @@ namespace pgeo {
     {
         // TODO: replace assertions with a Matrix Engine Concept.
         //static_assert(is_matrix_engine_v<ET2>);
-        check_source_engine_size(rhs, R, C);
-        assign_from_matrix_engine(*this, rhs);
+        detail::check_source_engine_size(rhs, R, C);
+        detail::assign_from_matrix_engine(*this, rhs);
     }
 
     template <typename T, ptrdiff_t R, ptrdiff_t C>
     template <typename T2>
     constexpr void MatrixEngine<T, R, C>::assign(std::initializer_list<std::initializer_list<T2>> rhs)
     {
-        check_source_init_list(rhs, R, C);
-        assign_from_matrix_initlist(*this, rhs);
+        detail::check_source_init_list(rhs, R, C);
+        detail::assign_from_matrix_initlist(*this, rhs);
     }
 
     // -------- Size queries Implementation ---------------------------------------------------------
