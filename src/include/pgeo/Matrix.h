@@ -6,24 +6,44 @@
 namespace pgeo {
 
     template <typename EngineType>
+    requires std::default_initializable<EngineType>
+            and
+            std::copyable<EngineType>
+            and
+            matrix_engine<EngineType>
     class Matrix {
 
+        static constexpr bool   is_writable = mutable_matrix_engine<EngineType>;
+
+        // helper tags for modifying the return type of the matrix views
+        using possibly_writable_submatrix = std::conditional_t<is_writable,matrix_view::submatrix, matrix_view::const_submatrix>;
+        using possibly_writable_transpose = std::conditional_t<is_writable, matrix_view::transpose, matrix_view::const_transpose>;
+
+
     public:
+
+
+        using owning_engine_type        = support::get_owning_engine_type_t<EngineType>;
         using element_type              = typename EngineType::element_type;
-        using value_type                = typename EngineType::value_type;
         using reference                 = typename EngineType::reference;
         using const_reference           = typename EngineType::const_reference;
-        using difference_type           = typename EngineType::difference_type;
-        using index_type                = typename EngineType::index_type;
-        using index_tuple               = typename EngineType::index_tuple;
-        using transpose_type			= Matrix&;
-        using const_transpose_type		= Matrix const&;
+        using size_type                 = typename EngineType::size_type;
+
+        // TODO: does there exist a matrix which does not have a span, e.g. should view matrices have spans?
         using span_type					= typename EngineType::span_type;
         using const_span_type			= typename EngineType::const_span_type;
 
+        // Type aliases for matrix views
+        using submatrix_type            = Matrix<MatrixViewEngine<EngineType, possibly_writable_submatrix>>;
+        using const_submatrix_type      = Matrix<MatrixViewEngine<EngineType, matrix_view::const_submatrix>>;
+        using transpose_type            = Matrix<MatrixViewEngine<EngineType, possibly_writable_transpose>>;
+        using const_transpose_type      = Matrix<MatrixViewEngine<EngineType, matrix_view::const_transpose>>;
+
+
+
 
         // destructor
-        ~Matrix() = default;
+        ~Matrix() noexcept = default;
 
         // default constructor
         constexpr Matrix() = default;
@@ -34,13 +54,52 @@ namespace pgeo {
         // Copy constructor
         constexpr Matrix(Matrix const&) = default;
 
-        // constructor with same engine but different type and size
+        /// constructor from different engine, but constructible from
+        /// the current engine
         template <typename EngineType2>
-        constexpr Matrix(Matrix<EngineType2> const& src);
+        constexpr Matrix(Matrix<EngineType2> const& src)
+        requires
+            mutable_matrix_engine<EngineType>
+            and
+            std::constructible_from<EngineType, EngineType2>
+        : engine_(src.engine_) {}
 
-        // constructor with initialization list (without type conversion)
+        /// Constructor from different engine and not constructible from
+        /// the current engine
+        template <typename EngineType2>
+        constexpr Matrix(Matrix<EngineType2> const& src)
+        requires
+            mutable_matrix_engine<EngineType>
+            and
+            (not std::constructible_from<EngineType, EngineType2>)
+            and
+            std::convertible_to<typename EngineType2::element_type, element_type>
+        : engine_()
+        {
+            support::assign_from(engine_, src.engine_);
+        }
+
+        /// Constructor with initialization list (without type conversion)
         template<typename T2>
-        constexpr Matrix(std::initializer_list<std::initializer_list<T2>> listOfRows);
+        constexpr Matrix(std::initializer_list<std::initializer_list<T2>> listOfRows)
+        requires
+            mutable_matrix_engine<EngineType>
+            and
+            std::constructible_from<EngineType, decltype(listOfRows)>
+        : engine_(listOfRows) {}
+
+        /// Constructor with initialization list and type conversion
+        template<typename T2>
+        constexpr Matrix(std::initializer_list<std::initializer_list<T2>> listOfRows)
+        requires
+        mutable_matrix_engine<EngineType>
+        and
+        (not std::constructible_from<EngineType, decltype(listOfRows)>)
+        and
+        std::convertible_to<T2, element_type>
+        {
+            support::assign_from(engine_, listOfRows);
+        }
 
         // move assignment
         constexpr Matrix& operator=(Matrix&&) noexcept = default;
@@ -48,173 +107,211 @@ namespace pgeo {
         // copy assignment
         constexpr Matrix& operator=(Matrix const&) = default;
 
-        // Assignment with same engine but different type and size
+        // Assignment directly from different engine
         template <typename EngineType2>
-        constexpr Matrix& operator=(Matrix<EngineType2> const& rhs);
+        constexpr Matrix& operator=(Matrix<EngineType2> const& rhs)
+        requires
+            mutable_matrix_engine<EngineType>
+            and
+            std::assignable_from<EngineType, EngineType2>
+        {
+            engine_ = rhs.engine();
+            return *this;
+        }
+
+        // Assignment from different non-assignable engine with type conversion
+        template <typename EngineType2>
+        constexpr Matrix& operator=(Matrix<EngineType2> const& rhs)
+        requires
+            mutable_matrix_engine<EngineType>
+            and
+            (not std::assignable_from<EngineType, EngineType2>)
+            and
+            std::convertible_to<typename EngineType2::element_type, element_type>
+        {
+            support::assign_from(engine_, rhs);
+            return *this;
+        }
 
         // Assignment with initialization list (with type conversion)
         template<typename T2>
-        constexpr Matrix& operator=(std::initializer_list<std::initializer_list<T2>> listOfRows);
+        constexpr Matrix& operator=(std::initializer_list<std::initializer_list<T2>> listOfRows)
+        requires
+            mutable_matrix_engine<EngineType>
+            and
+            std::assignable_from<EngineType, decltype(listOfRows)>
+        {
+            engine_ = listOfRows;
+            return *this;
+        }
+
+        // Assignment with initialization list (with type conversion)
+        template<typename T2>
+        constexpr Matrix& operator=(std::initializer_list<std::initializer_list<T2>> listOfRows)
+        requires
+            mutable_matrix_engine<EngineType>
+            and
+            (not std::assignable_from<EngineType, decltype(listOfRows)>)
+            and
+            std::convertible_to<T2, element_type>
+        {
+            support::assign_from(engine_, listOfRows);
+            return *this;
+        }
+
+
 
         // ------------------  Capacity --------------------------------
 
-        constexpr index_type columns() const noexcept;
-        constexpr index_type rows() const noexcept;
-        constexpr index_tuple size() const noexcept;
+        constexpr size_type columns() const noexcept
+        {
+            return engine_.columns();
+        }
+        constexpr size_type rows() const noexcept
+        {
+            return engine_.rows();
+        }
+        constexpr std::tuple<size_type, size_type> size() const noexcept
+        {
+            return engine_.size();
+        }
 
         // ------------------  Element access --------------------------
 
-        constexpr reference			operator()(index_type i, index_type j);
-        constexpr const_reference	operator()(index_type i, index_type j) const;
+        constexpr reference			operator()(size_type i, size_type j)
+        {
+            return engine_(i,j);
+        }
+        constexpr const_reference	operator()(size_type i, size_type j) const
+        {
+            return engine_(i,j);
+        }
 
-        constexpr transpose_type			t();
-        constexpr const_transpose_type		t() const;
+        // TODO: complete the implementation of these views
+        constexpr submatrix_type        submatrix(size_type rowStart, size_type rowStep,
+                                                  size_type colStart, size_type colStep) noexcept
+        {
+            return submatrix_type(detail::special_ctor_tag(), engine_, rowStart, rowStep, colStart, colStep);
+        }
+        constexpr const_submatrix_type  submatrix(size_type rowStart, size_type rowStep,
+                                                  size_type colStart, size_type colStep) const noexcept
+        {
+            return const_submatrix_type(detail::special_ctor_tag(), engine_, rowStart, rowStep, colStart, colStep);
+        }
+        constexpr transpose_type			t()
+        {
+            return transpose_type (detail::special_ctor_tag(), engine_);
+        }
+        constexpr const_transpose_type		t() const
+        {
+            return const_transpose_type (detail::special_ctor_tag(), engine_);
+        }
 
         // ------------------  Data access ----------------------------
 
-        constexpr EngineType&			engine() noexcept;
-        constexpr EngineType const&	engine() const noexcept;
+        constexpr EngineType&			engine() noexcept { return engine_; }
+        constexpr EngineType const&	engine() const noexcept { return engine_; }
 
-        constexpr span_type			span() noexcept;
-        constexpr const_span_type	span() const noexcept;
+        constexpr span_type			span() noexcept { return engine_.span(); }
+        constexpr const_span_type	span() const noexcept { return engine_.span(); }
 
         // ------------------  Modifiers ------------------------------
 
-        constexpr void swap(Matrix& rhs) noexcept;
-        constexpr void swapColumns(index_type col1, index_type col2) noexcept;
-        constexpr void swapRows(index_type row1, index_type row2) noexcept;
+        constexpr void swap(Matrix& rhs) noexcept
+        {
+            engine_.swap(rhs.engine_);
+        }
+        constexpr void swapColumns(size_type col1, size_type col2) noexcept
+        {
+            engine_.swapColumns(col1, col2);
+        }
+        constexpr void swapRows(size_type row1, size_type row2) noexcept
+        {
+            engine_.swapRows(row1, row2);
+        }
 
     private:
 
         EngineType							engine_;
 
-        template<typename ET2> friend class Matrix;
-        template<typename ET2> friend class vector;
+        template<typename ET2>
+        requires
+            std::default_initializable<ET2>
+            and
+            std::copyable<ET2>
+            and
+            matrix_engine<ET2>
+        friend class Matrix;
+
+        /// This constructor allows to create submatrix views and transpose matrix views
+        /// It uses tag dispatch
+        template<typename ET2, typename ... ARGS>
+        constexpr Matrix(detail::special_ctor_tag, ET2&& eng, ARGS&&... args)
+        : engine_(std::forward<ET2>(eng), std::forward<ARGS>(args)...) {}
 
     };     // class Matrix
 
-    // ------------ Constructor implementations -----------------------------------------
 
-    template <typename EngineType1>
-    template <typename EngineType2>
-    constexpr Matrix<EngineType1>::Matrix(Matrix<EngineType2> const& src)
-        : engine_(src.engine_) { }
 
-    template<typename ET>
+
+    // -------------- Matrix Aliases -----------------------------------------------------------
+
+    template<typename T, size_t R, size_t C>
+    using Mat = Matrix<
+                        MatrixEngine<T,
+                                    R, C,
+                                    matrix_layout::row_major>
+                        >;
+
     template <typename T>
-    constexpr Matrix<ET>::Matrix(std::initializer_list<std::initializer_list<T>> listOfRows)
-        : engine_(listOfRows) {}
+    using Mat22 = Mat<T, 2, 2>;
 
-    template<typename EngineType>
-    template<typename EngineType2>
-    constexpr Matrix<EngineType>& Matrix<EngineType>::operator=(Matrix<EngineType2> const& rhs)
-    {
-        engine_ = rhs.engine_;
-        return *this;
-    }
+    template <typename T>
+    using Mat33 = Mat<T, 3, 3>;
 
-    template<typename EngineType>
-    template<typename T>
-    constexpr Matrix<EngineType>& Matrix<EngineType>::operator=(std::initializer_list<std::initializer_list<T>> listOfRows)
-    {
-        engine_ = listOfRows;
-        return *this;
-    }
+    template <typename T>
+    using Mat44 = Mat<T, 4, 4>;
 
-    // ----------------- Size Implementation -----------------------------------------
+    // float precision
+    using Mat2f = Mat<float, 2, 2>;
+    using Mat3f = Mat<float, 3, 3>;
+    using Mat4f = Mat<float, 4, 4>;
 
-    template<typename EngineType>
-    constexpr auto Matrix<EngineType>::columns() const noexcept -> index_type {
-        return engine_.columns();
-    }
+    // double precision
+    using Mat2d = Mat<double, 2, 2>;
+    using Mat3d = Mat<double, 3, 3>;
+    using Mat4d = Mat<double, 4, 4>;
 
-    template<typename EngineType>
-    constexpr auto Matrix<EngineType>::rows() const noexcept -> index_type {
-        return engine_.rows();
-    }
 
-    template<typename EngineType>
-    constexpr auto Matrix<EngineType>::size() const noexcept -> index_tuple {
-        return index_tuple(engine_.rows(),engine_.columns());
-    }
 
-    // --------- Element Access Implementation ------------------------------------------
 
-    template<typename EngineType>
-    constexpr auto Matrix<EngineType>::operator()(index_type i, index_type j) -> reference {
-        return engine_(i,j);
-    }
+//
+//    template<class T, size_t R, class COT = void>
+//    using fixed_size_column_vector =
+//            matrix<matrix_storage_engine<T, R, 1, void, matrix_layout::column_major>, COT>;
+//
+//    template<class T, size_t C, class COT = void>
+//    using fixed_size_row_vector =
+//            matrix<matrix_storage_engine<T, 1, C, void, matrix_layout::row_major>, COT>;
+//
+//
+//    template<class T, size_t R, size_t C, class A = std::allocator<T>, class COT = void>
+//    using general_matrix =
+//            matrix<matrix_storage_engine<T, R, C, A, matrix_layout::row_major>, COT>;
 
-    template<typename EngineType>
-    constexpr auto Matrix<EngineType>::operator()(index_type i, index_type j) const -> const_reference {
-        return engine_(i,j);
-    }
-
-    // TODO: refactor this
-    template<typename EngineType>
-    constexpr auto Matrix<EngineType>::t() -> Matrix &{
-        return engine_.t();
-    }
-
-    // TODO: refactor this
-    template<typename EngineType>
-    constexpr auto Matrix<EngineType>::t() const -> const Matrix& {
-        return engine_.t();
-    }
-
-    // ------------ Data Access Implementation --------------------------------------------
-    template<typename EngineType>
-    constexpr auto Matrix<EngineType>::engine() noexcept -> EngineType& {
-        return engine_;
-    }
-
-    template<typename EngineType>
-    constexpr auto Matrix<EngineType>::engine() const noexcept -> const EngineType & {
-        return engine_;
-    }
-
-    template<typename EngineType>
-    constexpr auto Matrix<EngineType>::span() noexcept -> span_type {
-        return engine_.span();
-    }
-
-    template<typename EngineType>
-    constexpr auto Matrix<EngineType>::span() const noexcept -> const_span_type {
-        return engine_.span();
-    }
-
-    // ----------------------- Modifiers Implementation ------------------------------
-
-    template<typename ET>
-    constexpr void Matrix<ET>::swap(Matrix& rhs) noexcept
-    {
-        engine_.swap(rhs);
-    }
-
-    template<typename EngineType>
-    constexpr void Matrix<EngineType>::swapColumns(index_type col1, index_type col2) noexcept
-    {
-        engine_.swapColumns(col1,col2);
-    }
-
-    template<typename EngineType>
-    constexpr void Matrix<EngineType>::swapRows(index_type row1, index_type row2) noexcept
-    {
-        engine_.swapRows(row1,row2);
-    }
 
     // -------------- Equality Comparison ------------------------------------------------------
 
     template <typename ET1, typename ET2>
     constexpr bool operator==(Matrix<ET1> const& lhs, Matrix<ET2> const& rhs)
     {
-    	return detail::matrixComparisonEquality(lhs.engine(), rhs.engine());
+    	return support::are_engines_equal(lhs.engine(), rhs.engine());
     }
 
     template <typename ET1, typename ET2>
     constexpr bool operator!=(Matrix<ET1> const& lhs, Matrix<ET2> const& rhs)
     {
-    	return !detail::matrixComparisonEquality(lhs.engine(), rhs.engine());
+    	return !support::are_engines_equal(lhs.engine(), rhs.engine());
     }
 
 

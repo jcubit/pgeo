@@ -6,51 +6,71 @@
 
 namespace pgeo {
 
-    template<class T, ptrdiff_t R, ptrdiff_t C>
+    /// Default RAII Engine Type for fixed size matrices that owns memory through std::array
+    /// It also handles how the access of the elements is depending on the layout
+    template<typename T, size_t R, size_t C, typename L>
+    requires
+        valid_fixed_engine_size<R,C>
+        and
+        valid_layout_for_storage_engine<L>
+        and
+        valid_matrix_elements<T>
     class MatrixEngine
     {
-        static_assert(R >= 1, "Number of rows must at least 1" );
-        static_assert(C >= 1, "Number of columns must at least 1");
 
     public:
 
-        //using engine_category = initable_matrix_engine_tag;
+        /// The element entries of the matrix
+        std::array<T, R*C>							matrixElements_;
+
+        static constexpr bool   is_column_matrix     = (C == 1);
+        static constexpr bool   is_row_matrix        = (R == 1);
+        static constexpr bool   is_column_major      = std::is_same_v<L, matrix_layout::column_major>;
+        static constexpr bool   is_row_major         = std::is_same_v<L, matrix_layout::row_major>;
+
+        static constexpr size_t     rows_   = R;
+        static constexpr size_t     cols_   = C;
+
         using element_type    = T;
-        using value_type      = std::remove_cv_t<T>;
-        using pointer         = element_type*;
-        using const_pointer   = element_type const*;
+        using layout_type     = L;
         using reference       = element_type&;
         using const_reference = element_type const&;
-        using difference_type = ptrdiff_t;
-        using index_type      = ptrdiff_t;
-        using index_tuple     = stdex::extents<R, C>;
+        using size_type       = size_t;
         using span_type       = stdex::mdspan<element_type, R, C>;
         using const_span_type = stdex::mdspan<element_type const, R, C>;
+
 
 
         // destructor
         ~MatrixEngine() noexcept = default;
 
         // default constructor
-        constexpr MatrixEngine();
-
+        constexpr MatrixEngine() = default;
         // Move constructors
         constexpr MatrixEngine(MatrixEngine&&) noexcept = default;
-
         // Copy constructor
         constexpr MatrixEngine(MatrixEngine const&) noexcept = default;
 
-        // constructor with same engine but different type and size
-        template <typename T2, ptrdiff_t R2, ptrdiff_t C2>
-        constexpr MatrixEngine(MatrixEngine<T2, R2, C2> const& src);
-
-        // constructor from totally different engine type
+        // constructor from different engine type
         template <typename ET2>
-        constexpr MatrixEngine(ET2 const& src);
+        constexpr MatrixEngine(ET2 const& src)
+            requires
+            matrix_engine<ET2>
+            and
+            std::convertible_to<typename ET2::element_type, element_type>
+        : matrixElements_()
+        {
+          support::assign_from(*this, src);
+        }
 
         // constructor with initialization list (with type conversion)
         template<typename T2>
-        constexpr MatrixEngine(std::initializer_list<std::initializer_list<T2>> rhs);
+        constexpr MatrixEngine(std::initializer_list<std::initializer_list<T2>> src)
+        requires std::convertible_to<T2, T>
+        : matrixElements_()
+        {
+            support::assign_from(*this, src);
+        }
 
 
         // move assignment
@@ -59,225 +79,108 @@ namespace pgeo {
         // copy assignment
         constexpr MatrixEngine& operator=(MatrixEngine const&) = default;
 
-        // Assignment with same engine but different type and size
-        template <typename T2, ptrdiff_t R2, ptrdiff_t C2>
-        constexpr MatrixEngine& operator=(MatrixEngine<T2, R2, C2> const& rhs);
-
-        // Assignment from totally different engine type
+        // Assignment from different engine type.
+        // It performs type conversion
         template <typename ET2>
-        constexpr MatrixEngine& operator=(ET2 const& rhs);
+        constexpr MatrixEngine& operator=(ET2 const& rhs)
+        requires
+        matrix_engine<ET2>
+        and
+        std::convertible_to<typename ET2::element_type, element_type>
+        {
+            support::assign_from(*this, rhs);
+            return *this;
+        }
 
         // Assignment with initialization list (with type conversion)
-        template<typename T2>
-        constexpr MatrixEngine& operator=(std::initializer_list<std::initializer_list<T2>> rhs);
+        template<typename U>
+        constexpr MatrixEngine& operator=(std::initializer_list<std::initializer_list<U>> rhs)
+                requires std::convertible_to<U, element_type>
+        {
+            support::assign_from(*this, rhs);
+            return *this;
+        }
 
-        // ------------------  Capacity --------------------------------
+        // ------------------  Size --------------------------------
 
-        constexpr index_type columns() const noexcept;
-        constexpr index_type rows() const noexcept;
-        constexpr index_tuple size() const noexcept;
+        constexpr size_type columns() const noexcept
+        {
+            return cols_;
+        }
+        constexpr size_type rows() const noexcept
+        {
+            return rows_;
+        }
+        constexpr std::tuple<size_type,size_type> size() const noexcept
+        {
+            return std::make_tuple(rows_,cols_);
+        }
 
         // ------------------  Element access --------------------------
 
-        constexpr reference			operator()(index_type i, index_type j);
-        constexpr const_reference	operator()(index_type i, index_type j) const;
+        constexpr reference			operator()(size_type i, size_type j)
+        requires is_row_major
+        {
+            return matrixElements_[i*cols_ + j];
+        }
+
+        constexpr reference			operator()(size_type i, size_type j)
+        requires is_column_major
+        {
+            return matrixElements_[j*rows_ + i];
+        }
+
+
+        constexpr const_reference	operator()(size_type i, size_type j) const
+        requires is_row_major
+        {
+            return matrixElements_[i*cols_ + j];
+        }
+
+        constexpr const_reference	operator()(size_type i, size_type j) const
+        requires is_column_major
+        {
+            return matrixElements_[j*rows_ + i];
+        }
 
         // ------------------  Data access --------------------------
-        constexpr span_type			span() noexcept;
-        constexpr const_span_type	span() const noexcept;
+        constexpr span_type			span() noexcept
+        {
+            return span_type(matrixElements_.data());
+        }
+        constexpr const_span_type	span() const noexcept
+        {
+            return const_span_type(matrixElements_.data());
+        }
 
         // ------------------  Modifiers  --------------------------
-        constexpr void swap(MatrixEngine& rhs) noexcept;
-        constexpr void swapColumns(index_type j1, index_type j2) noexcept;
-        constexpr void swapRows(index_type i1, index_type i2) noexcept;
+        constexpr void swap(MatrixEngine& rhs) noexcept
+        {
+            std::swap(matrixElements_, rhs.matrixElements_);
+        }
+        constexpr void swapColumns(size_type j1, size_type j2) noexcept
+        requires is_row_major
+        {
+            if (j1 != j2) {
+                for (size_type i = 0; i < rows_; ++i) {
+                    std::swap(matrixElements_[i*cols_ + j1], matrixElements_[i * cols_ + j2]);
+                }
+            }
+        }
+        constexpr void swapRows(size_type i1, size_type i2) noexcept
+        requires is_row_major
+        {
+            if (i1 != i2) {
+                for (size_type j = 0; j < cols_; ++j) {
+                    std::swap(matrixElements_[i1 * cols_ + j], matrixElements_[i2 * cols_ + j]);
+                }
+            }
+        }
 
-    private:
-
-        template<typename T2, ptrdiff_t R2, ptrdiff_t C2> friend class MatrixEngine;
-
-        /// The element entries of the matrix
-        std::array<T, R*C>							matrixElements_;
-
-        template<typename T2, ptrdiff_t R2, ptrdiff_t C2>
-        constexpr void assign(MatrixEngine<T2, R2, C2> const& rhs);
-
-        template <typename ET2>
-        constexpr void assign(ET2 const& rhs);
-
-        template <typename T2>
-        constexpr void assign(std::initializer_list<std::initializer_list<T2>> rhs);
 
     };     // class MatrixEngine
 
-
-    // ------------ Constructor implementations -----------------------------------------
-
-    template<class T, ptrdiff_t R, ptrdiff_t C>
-    constexpr MatrixEngine<T, R, C>::MatrixEngine()
-            : matrixElements_() { }
-
-    template<typename T, ptrdiff_t R, ptrdiff_t C>
-    template <typename T2, ptrdiff_t R2, ptrdiff_t C2>
-    constexpr MatrixEngine<T, R, C>::MatrixEngine(MatrixEngine<T2, R2, C2> const& src)
-            : matrixElements_()
-    {
-        assign(src);
-    }
-
-    template <typename T, ptrdiff_t R, ptrdiff_t C>
-    template <typename ET2>
-    constexpr MatrixEngine<T, R, C>::MatrixEngine(ET2 const& src)
-            : matrixElements_()
-    {
-        assign(src);
-    }
-
-    template <typename T, ptrdiff_t R, ptrdiff_t C>
-    template<typename T2>
-    constexpr MatrixEngine<T, R, C>::MatrixEngine(std::initializer_list<std::initializer_list<T2>> rhs)
-            : matrixElements_()
-    {
-        assign(rhs);
-    }
-
-    // ----------------- Public Assignment --------------------------------------
-
-
-    template <typename T, ptrdiff_t R, ptrdiff_t C>
-    template <typename T2, ptrdiff_t R2, ptrdiff_t C2>
-    constexpr MatrixEngine<T,R,C>& MatrixEngine<T, R, C>::operator=(MatrixEngine<T2, R2, C2> const& rhs)
-    {
-        assign(rhs);
-        return *this;
-    }
-
-    template <typename T, ptrdiff_t R, ptrdiff_t C>
-    template <typename ET2>
-    constexpr MatrixEngine<T, R, C>& MatrixEngine<T, R, C>::operator=(ET2 const& rhs)
-    {
-        assign(rhs);
-        return *this;
-    }
-
-    template <typename T, ptrdiff_t R, ptrdiff_t C>
-    template<typename T2>
-    constexpr MatrixEngine<T, R, C>& MatrixEngine<T, R, C>::operator=(std::initializer_list<std::initializer_list<T2>> rhs)
-    {
-        assign(rhs);
-        return *this;
-    }
-
-    // ------- Private Assign Implementations --------------------------------------------
-
-    template<typename T, ptrdiff_t R, ptrdiff_t C>
-    template<typename T2, ptrdiff_t R2, ptrdiff_t C2>
-    constexpr void MatrixEngine<T, R, C>::assign(MatrixEngine<T2, R2, C2> const& rhs)
-    {
-        static_assert(R == R2 && C == C2,
-                      "Size of matrix does not coincide in private assign member method");
-
-        for (index_type i = 0; i < (R * C); ++i) {
-            matrixElements_[i] = static_cast<T>(rhs.matrixElements_[i]);
-        }
-    }
-
-    template<typename T, ptrdiff_t R, ptrdiff_t C>
-    template<typename ET2>
-    constexpr void MatrixEngine<T, R, C>::assign(ET2 const& rhs)
-    {
-        // TODO: replace assertions with a Matrix Engine Concept.
-        //static_assert(is_matrix_engine_v<ET2>);
-        detail::check_source_engine_size(rhs, R, C);
-        detail::assign_from_matrix_engine(*this, rhs);
-    }
-
-    template <typename T, ptrdiff_t R, ptrdiff_t C>
-    template <typename T2>
-    constexpr void MatrixEngine<T, R, C>::assign(std::initializer_list<std::initializer_list<T2>> rhs)
-    {
-        detail::check_source_init_list(rhs, R, C);
-        detail::assign_from_matrix_initlist(*this, rhs);
-    }
-
-    // -------- Size queries Implementation ---------------------------------------------------------
-
-    template <typename T, ptrdiff_t R, ptrdiff_t C>
-    constexpr auto MatrixEngine<T, R, C>::columns() const noexcept -> index_type
-    {
-        return C;
-    }
-
-    template <typename T, ptrdiff_t R, ptrdiff_t C>
-    constexpr auto MatrixEngine<T, R, C>::rows() const noexcept -> index_type
-    {
-        return R;
-    }
-
-    template<typename T, ptrdiff_t R, ptrdiff_t C>
-    constexpr auto MatrixEngine<T, R, C>::size() const noexcept -> index_tuple
-    {
-        return index_tuple{}; // TODO
-    }
-
-    // -------- Element Access Implementation ------------------------------------------------------
-
-    template<typename T, ptrdiff_t R, ptrdiff_t C>
-    constexpr auto MatrixEngine< T, R, C>::operator()(index_type i, index_type j) -> reference
-    {
-        return matrixElements_[i * C + j];
-    }
-
-    template<typename T, ptrdiff_t R, ptrdiff_t C>
-    constexpr auto MatrixEngine< T, R, C>::operator()(index_type i, index_type j) const -> const_reference
-    {
-        return matrixElements_[i * C + j];
-    }
-
-    // -------- Data Access Implementation ------------------------------------------------------
-
-    template<typename T, ptrdiff_t R, ptrdiff_t C>
-    constexpr auto MatrixEngine<T, R, C>::span() noexcept -> span_type
-    {
-        return span_type(matrixElements_.data());
-    }
-
-    template<typename T, ptrdiff_t R, ptrdiff_t C>
-    constexpr auto MatrixEngine<T, R, C>::span() const noexcept -> const_span_type
-    {
-        return const_span_type(matrixElements_.data());
-    }
-
-    // --------- Public Modifiers ---------------------------------------------------------------
-
-    template<typename T, ptrdiff_t R, ptrdiff_t C>
-    constexpr void MatrixEngine<T, R, C>::swap(MatrixEngine& rhs) noexcept
-    {
-        if (&rhs != this) {
-            std::swap(matrixElements_, rhs.data_);
-        }
-    }
-
-    template<typename T, ptrdiff_t R, ptrdiff_t C>
-    constexpr void MatrixEngine<T, R, C>::swapColumns(index_type j1, index_type j2) noexcept
-    {
-        if (j1 != j2) {
-            for (index_type i = 0; i < R; ++i) {
-                std::swap(matrixElements_[i*C + j1], matrixElements_[i * C + j2]);
-            }
-        }
-    }
-
-    template<typename T, ptrdiff_t R, ptrdiff_t C>
-    constexpr void MatrixEngine<T, R, C>::swapRows(index_type i1, index_type i2) noexcept
-    {
-        if (i1 != i2) {
-            for (index_type j = 0; j < C; ++j) {
-                std::swap(matrixElements_[i1 * C + j], matrixElements_[i2 * C + j]);
-            }
-        }
-    }
-
-}
+} // namespace pgeo
 
 
 #endif //PGEOCL_MATRIXENGINE_H
