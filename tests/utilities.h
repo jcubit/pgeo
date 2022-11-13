@@ -85,5 +85,36 @@ struct fmt::formatter<pgeo::Mat<T,R,C>> : fmt::formatter<std::string>
 };
 
 
+// ------ Concepts Debug --------------------------------
+// We want to find out which constructor is called when we copy assign a TransposeView2f to a Mat2f
+namespace pgeo
+{
+
+    template<typename T, size_t R, size_t C>
+    using TransposeView = Matrix
+            <MatrixViewEngine<
+                    MatrixEngine<T,
+                            R, C,
+                            matrix_layout::row_major>,
+                    matrix_view::transpose>>;
+
+    using TransposeView2f = TransposeView<float,2,2>;
+
+
+    static_assert(std::constructible_from<Mat2f ,TransposeView2f>);
+    static_assert(mutable_matrix_engine<Mat2f>);
+    static_assert(matrix_engine<TransposeView2f>);
+
+    // The following constructor is called!
+
+//    template <typename EngineType2>
+//    constexpr Matrix(Matrix<EngineType2> const& src)
+//    requires
+//    mutable_matrix_engine<EngineType>
+//    and
+//    std::constructible_from<EngineType, EngineType2>
+//            : engine_(src.engine_) {}
+}
+
 
 #endif //PGEOCL_UTILITIES_H
