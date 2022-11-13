@@ -22,11 +22,10 @@ target_include_directories(pgeo
 target_sources(pgeo
         INTERFACE
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/include/pgeo.h>
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/include/pgeo/ForwardDeclarations.h>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/include/pgeo/Matrix.h>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/include/pgeo/MatrixEngine.h>
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/include/pgeo/Addition.h>
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/include/pgeo/PrivateSupport.h>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/include/pgeo/MatrixEngineSupport.h>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/include/pgeo/MatrixViewEngine.h>
         )
 
 target_compile_features(pgeo

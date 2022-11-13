@@ -13,9 +13,10 @@ FetchContent_MakeAvailable(googletest)
 add_executable(pgeoTest)
 
 target_sources(pgeoTest PRIVATE
-        TestMain.cpp
+        test_main.cpp
         test_matrix.cpp
-        test_addition.cpp
+        test_matrix_views.cpp
+        #test_addition.cpp
         utilities.h
 )
 
