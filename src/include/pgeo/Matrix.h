@@ -101,6 +101,57 @@ namespace pgeo {
             support::assign_from(engine_, listOfRows);
         }
 
+        // (Co-)Vector constructors from std::array or std::vector
+        template<typename Container>
+        constexpr explicit Matrix(const Container& src)
+        requires
+            mutable_vector_or_covector_engine<EngineType>
+            and
+            support::is_std_array_or_vector_v<Container>
+            and
+            std::constructible_from<EngineType, Container>
+        :   engine_(src)
+        {}
+
+        template<typename Container>
+        constexpr explicit Matrix(const Container & src)
+        requires
+            mutable_vector_or_covector_engine<EngineType>
+            and
+            support::is_std_array_or_vector_v<Container>
+            and
+            (not std::constructible_from<EngineType, Container>)
+            and
+            std::convertible_to<typename Container::value_type, typename EngineType::element_type>
+        :   engine_()
+        {
+                support::assign_from(engine_, src);
+        }
+
+        // Constructor of (co-)vector from initialization list
+        template<typename U>
+        constexpr Matrix(std::initializer_list<U> src)
+        requires
+            mutable_vector_or_covector_engine<EngineType>
+            and
+            std::constructible_from<EngineType, decltype(src)>
+        :   engine_(src)
+        {}
+
+        template<typename U>
+        constexpr Matrix(std::initializer_list<U> src)
+        requires
+            mutable_vector_or_covector_engine<EngineType>
+            and
+            (not std::constructible_from<EngineType, decltype(src)>)
+            and
+            std::convertible_to<U, element_type>
+        :   engine_()
+        {
+                support::assign_from(engine_, src);
+        }
+
+
         // move assignment
         constexpr Matrix& operator=(Matrix&&) noexcept = default;
 
@@ -133,7 +184,7 @@ namespace pgeo {
             return *this;
         }
 
-        // Assignment with initialization list (with type conversion)
+        // Assignment with 2D initialization list (with type conversion)
         template<typename T2>
         constexpr Matrix& operator=(std::initializer_list<std::initializer_list<T2>> listOfRows)
         requires
@@ -145,7 +196,7 @@ namespace pgeo {
             return *this;
         }
 
-        // Assignment with initialization list (with type conversion)
+        // Assignment with 2D initialization list (with type conversion) when engine is not assignable
         template<typename T2>
         constexpr Matrix& operator=(std::initializer_list<std::initializer_list<T2>> listOfRows)
         requires
@@ -159,7 +210,61 @@ namespace pgeo {
             return *this;
         }
 
+        // Assignment with std::array or std::vector (with type conversion)
+        template<typename Container>
+        constexpr Matrix& operator =(Container const& rhs)
+        requires
+        mutable_vector_or_covector_engine<EngineType>
+        and
+        support::is_std_array_or_vector_v<Container>
+        and
+        std::assignable_from<EngineType, decltype(rhs)>
+        {
+            engine_ = rhs;
+            return *this;
+        }
 
+        template<typename Container>
+        constexpr Matrix&
+        operator =(Container const& rhs)
+        requires
+            mutable_vector_or_covector_engine<EngineType>
+            and
+            support::is_std_array_or_vector_v<Container>
+            and
+            (not std::assignable_from<EngineType, decltype(rhs)>)
+            and
+            std::convertible_to<typename Container::value_type, element_type>
+        {
+            support::assign_from(engine_, rhs);
+            return *this;
+        }
+
+        // Assignment with 1D initialization list (with type conversion)
+        template<typename U>
+        constexpr Matrix& operator =(std::initializer_list<U> rhs)
+            requires
+            mutable_vector_or_covector_engine<EngineType>
+            and
+            std::assignable_from<EngineType, decltype(rhs)>
+        {
+            engine_ = rhs;
+            return *this;
+        }
+
+        template<typename U>
+        constexpr Matrix&
+        operator =(std::initializer_list<U> rhs)
+        requires
+            mutable_vector_or_covector_engine<EngineType>
+            and
+            (not std::assignable_from<EngineType, decltype(rhs)>)
+            and
+            std::convertible_to<U, element_type>
+        {
+            support::assign_from(engine_, rhs);
+            return *this;
+        }
 
         // ------------------  Capacity --------------------------------
 
@@ -187,7 +292,21 @@ namespace pgeo {
             return engine_(i,j);
         }
 
-        // TODO: complete the implementation of these views
+        constexpr reference operator ()(size_type i)
+        requires
+            mutable_vector_or_covector_engine<EngineType>
+        {
+            return engine_(i);
+        }
+
+        constexpr const_reference operator ()(size_type i) const
+        requires
+            mutable_vector_or_covector_engine<EngineType>
+        {
+            return engine_(i);
+        }
+
+
         constexpr submatrix_type        submatrix(size_type rowStart, size_type rowStep,
                                                   size_type colStart, size_type colStep) noexcept
         {
@@ -256,11 +375,11 @@ namespace pgeo {
 
     // -------------- Matrix Aliases -----------------------------------------------------------
 
-    template<typename T, size_t R, size_t C>
+    template<typename T, size_t R, size_t C, typename L = matrix_layout::row_major>
     using Mat = Matrix<
                         MatrixEngine<T,
                                     R, C,
-                                    matrix_layout::row_major>
+                                    L>
                         >;
 
     template <typename T>
@@ -282,7 +401,43 @@ namespace pgeo {
     using Mat3d = Mat<double, 3, 3>;
     using Mat4d = Mat<double, 4, 4>;
 
+    // Vectors are assumed to be column vectors in Pgeo
+    template<typename T, size_t R>
+    using Vec = Matrix<
+            MatrixEngine<T,
+                    R, 1,
+                    matrix_layout::column_major>>;
 
+    using Vec2i = Vec<int,2>;
+    using Vec3i = Vec<int,3>;
+    using Vec4i = Vec<int,4>;
+
+    using Vec2f = Vec<float,2>;
+    using Vec3f = Vec<float,3>;
+    using Vec4f = Vec<float,4>;
+
+    using Vec2d = Vec<double,2>;
+    using Vec3d = Vec<double,3>;
+    using Vec4d = Vec<double,4>;
+
+    // Co-vectors are assumed to be row vectors in Pgeo
+    template<typename T, size_t C>
+    using CoVec = Matrix<
+            MatrixEngine<T,
+                    1, C,
+                    matrix_layout::row_major>>;
+
+    using CoVec2i = CoVec<int,2>;
+    using CoVec3i = CoVec<int,3>;
+    using CoVec4i = CoVec<int,4>;
+
+    using CoVec2f = CoVec<float,2>;
+    using CoVec3f = CoVec<float,3>;
+    using CoVec4f = CoVec<float,4>;
+
+    using CoVec2d = CoVec<double,2>;
+    using CoVec3d = CoVec<double,3>;
+    using CoVec4d = CoVec<double,4>;
 
 
 //

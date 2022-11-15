@@ -23,10 +23,11 @@ namespace pgeo {
         /// The element entries of the matrix
         std::array<T, R*C>							matrixElements_;
 
-        static constexpr bool   is_column_matrix     = (C == 1);
-        static constexpr bool   is_row_matrix        = (R == 1);
-        static constexpr bool   is_column_major      = std::is_same_v<L, matrix_layout::column_major>;
-        static constexpr bool   is_row_major         = std::is_same_v<L, matrix_layout::row_major>;
+        static constexpr bool   is_column_matrix        = (C == 1);
+        static constexpr bool   is_row_matrix           = (R == 1);
+        static constexpr bool   is_vector_or_covector   = (is_column_matrix || is_row_matrix);
+        static constexpr bool   is_column_major         = std::is_same_v<L, matrix_layout::column_major>;
+        static constexpr bool   is_row_major            = std::is_same_v<L, matrix_layout::row_major>;
 
         static constexpr size_t     rows_   = R;
         static constexpr size_t     cols_   = C;
@@ -72,6 +73,31 @@ namespace pgeo {
             support::assign_from(*this, src);
         }
 
+        // Vector and covector constructors
+        template<typename Container>
+        constexpr MatrixEngine(const Container& src)
+        requires
+            is_vector_or_covector
+            and
+            support::is_std_array_or_vector_v<Container>
+            and
+            std::convertible_to<typename Container::value_type, element_type>
+        : matrixElements_()
+        {
+            support::assign_from(*this, src);
+        }
+
+        template<typename U>
+        constexpr MatrixEngine(std::initializer_list<U> src)
+        requires
+            is_vector_or_covector
+            and
+            std::convertible_to<U, element_type>
+        :   matrixElements_()
+        {
+            support::assign_from(*this, src);
+        }
+
 
         // move assignment
         constexpr MatrixEngine& operator=(MatrixEngine&&) noexcept = default;
@@ -96,6 +122,31 @@ namespace pgeo {
         template<typename U>
         constexpr MatrixEngine& operator=(std::initializer_list<std::initializer_list<U>> rhs)
                 requires std::convertible_to<U, element_type>
+        {
+            support::assign_from(*this, rhs);
+            return *this;
+        }
+
+        // (Co-)vector assignment
+        template<typename Container>
+        constexpr MatrixEngine& operator=(Container const& rhs)
+        requires
+        is_vector_or_covector
+        and
+        support::is_std_array_or_vector_v<Container>
+        and
+        std::convertible_to<typename Container::value_type, element_type>
+        {
+            support::assign_from(*this, rhs);
+            return *this;
+        }
+
+        template<class U>
+        constexpr MatrixEngine& operator =(std::initializer_list<U> rhs)
+        requires
+        is_vector_or_covector
+        and
+        std::convertible_to<U, element_type>
         {
             support::assign_from(*this, rhs);
             return *this;
@@ -141,6 +192,22 @@ namespace pgeo {
         requires is_column_major
         {
             return matrixElements_[j*rows_ + i];
+        }
+
+        // ------------------ (Co-)Vector Element access --------------------------
+
+        constexpr reference operator ()(size_type i)
+        requires
+        is_vector_or_covector
+        {
+            return matrixElements_[i];
+        }
+
+        constexpr const_reference operator ()(size_type i) const
+        requires
+        is_vector_or_covector
+        {
+            return matrixElements_[i];
         }
 
         // ------------------  Data access --------------------------

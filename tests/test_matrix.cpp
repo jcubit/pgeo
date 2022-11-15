@@ -10,7 +10,6 @@ TEST(MatrixTest, Constructors) {
     // list copy assignment
     pgeo::Mat2f m1 = {{1.0f, 2.0f},
                       {3.0f, 4.0f}};
-    print(m1);
 
     // sut
     EXPECT_EQ(m1(0,0), 1);

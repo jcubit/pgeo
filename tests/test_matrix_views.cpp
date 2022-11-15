@@ -43,6 +43,7 @@ TEST(Submatrix, changeSubmatrix)
 
 }
 
+
 TEST(MatrixTranspose, Size)
 {
     pgeo::Mat<float,3,2> m32 = { {1.0f,2.0f},
