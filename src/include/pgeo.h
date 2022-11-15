@@ -36,11 +36,10 @@ namespace pgeo {
 
 
 #include "pgeo/MatrixEngineSupport.h"
-
-
 #include "pgeo/MatrixEngine.h"
 #include "pgeo/MatrixViewEngine.h"
 #include "pgeo/Matrix.h"
+#include "pgeo/Addition.h"
 
 
 

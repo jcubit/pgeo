@@ -26,6 +26,7 @@ target_sources(pgeo
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/include/pgeo/MatrixEngine.h>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/include/pgeo/MatrixEngineSupport.h>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/include/pgeo/MatrixViewEngine.h>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/include/pgeo/Addition.h>
         )
 
 target_compile_features(pgeo

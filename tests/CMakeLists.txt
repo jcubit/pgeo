@@ -16,7 +16,8 @@ target_sources(pgeoTest PRIVATE
         test_main.cpp
         test_matrix.cpp
         test_matrix_views.cpp
-        #test_addition.cpp
+        test_vector.cpp
+        test_addition.cpp
         utilities.h
 )
 
