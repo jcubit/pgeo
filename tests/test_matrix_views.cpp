@@ -79,4 +79,42 @@ TEST(MatrixTranspose, copyTranspose)
 }
 
 
+TEST(MatrixTranspose, Span)
+{
+    pgeo::Mat<float,3,4> m34 = { {1.0f, 2.0f,  3.0f, 4.0f},
+                                 {5.0f, 6.0f,  7.0f, 8.0f},
+                                 {9.0f, 10.0f, 11.0f, 12.0f}};
+
+
+    auto s_t = m34.t().span();
+
+    // sut
+    EXPECT_EQ(s_t.extent(0), 4);
+    EXPECT_EQ(s_t.extent(1), 3);
+
+    EXPECT_EQ(s_t.stride(0), 1);
+    EXPECT_EQ(s_t.stride(1), 3);
+
+    pgeo::Mat<float,4,3> m43_{};
+    for (size_t i = 0; i < s_t.extent(0); ++i) {
+        for (int j = 0; j < s_t.extent(1); ++j) {
+            m43_(i,j) = s_t(i,j);
+        }
+    }
+
+    pgeo::Mat<float,4,3> m43 = {  {1, 4, 7},
+                                  {2, 5, 8},
+                                  {3, 6, 9},
+                                  {4, 7, 10}};
+
+    // sut
+    EXPECT_EQ(m43, m43_);
+
+    print(m43);
+
+}
+
+
+
+
 
