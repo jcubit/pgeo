@@ -54,22 +54,15 @@ auto format_to_matrix_impl(OutputIt outputIt,
                            uint32_t precision = 3,
                            std::string separator = ",") -> OutputIt
 {
+    // copy array into row-major layout as the string format is also in this order
+    // The element access of Matrix takes care of the matrix layout
     std::array<T, R*C> array{};
     auto matrixSpan = matrix.span();
-    if constexpr (std::is_same_v<L, pgeo::matrix_layout::column_major>){
-        for(size_t i=0; i< matrixSpan.extent(0); i++){
-            for(size_t j=0; j< matrixSpan.extent(1); j++){
-                array[i*C + j] = matrixSpan(i, j);
-            }
-        }
-    } else {
-        for(size_t i=0; i< matrixSpan.extent(0); i++){
-            for(size_t j=0; j< matrixSpan.extent(1); j++){
-                array[i + j * R] = matrixSpan(i, j);
-            }
+    for(size_t i=0; i< matrixSpan.extent(0); i++){
+        for(size_t j=0; j< matrixSpan.extent(1); j++){
+            array[i*C + j] = matrixSpan(i, j);
         }
     }
-
 
     std::string matrix_format = matrix_string_format<R,C>(prefix, precision, separator);
     return fmt::format_to(outputIt, matrix_format, array[I]...);
