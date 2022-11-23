@@ -5,7 +5,6 @@
 
 TEST(MatrixTest, Addition) {
 
-    // list copy assignment
     pgeo::Mat2f m1 = {{1.0f, 2.0f},
                       {3.0f, 4.0f}};
 
@@ -19,9 +18,8 @@ TEST(MatrixTest, Addition) {
                                {0.0f, 8.5f}}));
 }
 
-TEST(MatrixTest, VectorAddition) {
+TEST(Vector, Addition) {
 
-    // list copy assignment
     pgeo::Vec3f v1 = {1.0f, 2.0f, 3.0f};
 
     pgeo::Vec3f v2 = {-1.0f, 2.0f, -3.0f};
@@ -32,9 +30,8 @@ TEST(MatrixTest, VectorAddition) {
     EXPECT_EQ(v3, pgeo::Vec3f({0.0f, 4.0f, 0.0f}));
 }
 
-TEST(MatrixTest, CoVectorAddition) {
+TEST(CoVector, Addition) {
 
-    // list copy assignment
     pgeo::CoVec3f v1 = {1.0f, 2.0f, 3.0f};
 
     pgeo::CoVec3f v2 = {-1.0f, 2.0f, -3.0f};
@@ -46,4 +43,20 @@ TEST(MatrixTest, CoVectorAddition) {
     print(v3, "v3");
 
     EXPECT_EQ(v3, pgeo::CoVec3f({0.0f, 4.0f, 0.0f}));
+}
+
+TEST(Vector, AdditionWithView) {
+
+    pgeo::Mat<float, 3, 2> m = {{-1.0f, -2.0f},
+                                {3.0f, 4.0f},
+                                {-3.0f, 4.0f}};
+
+    pgeo::Vec3f t = m.submatrix(0,3,0,1);
+
+    pgeo::Vec3f v = {1.0f, 2.0f, 3.0f};
+
+    // sut
+    pgeo::Vec3f result = v + pgeo::Vec3f(m.submatrix(0,3,0,1)) + t;
+
+    EXPECT_EQ(result, pgeo::Vec3f({-1.0f, 8.0f, -3.0f}));
 }

@@ -5,7 +5,7 @@
 
 
 
-TEST(MatrixTest, Constructors) {
+TEST(Matrix, Constructors) {
 
     // list copy assignment
     pgeo::Mat2f m1 = {{1.0f, 2.0f},
@@ -57,8 +57,36 @@ TEST(MatrixTest, Constructors) {
 
 }
 
+TEST(Matrix, Span)
+{
+    pgeo::Mat<float,3,4> m34 = { {1.0f, 2.0f,  3.0f, 4.0f},
+                                 {5.0f, 6.0f,  7.0f, 8.0f},
+                                 {9.0f, 10.0f, 11.0f, 12.0f}};
 
-TEST(MatrixTest, MatrixByteSize)
+    auto s = m34.span();
+
+    // sut
+    EXPECT_EQ(s.extent(0), 3);
+    EXPECT_EQ(s.extent(1), 4);
+
+    EXPECT_EQ(s.stride(0), 4);
+    EXPECT_EQ(s.stride(1), 1);
+
+
+    pgeo::Mat<float,3,4> m34_{};
+
+    for (size_t i = 0; i < s.extent(0); ++i) {
+        for (int j = 0; j < s.extent(1); ++j) {
+            m34_(i,j) = s(i,j);
+        }
+    }
+
+    // sut
+    EXPECT_EQ(m34, m34_);
+}
+
+
+TEST(Matrix, MatrixByteSize)
 {
     // sut
     EXPECT_EQ(sizeof(pgeo::Mat<float,2,2>), sizeof(float) * 4);
