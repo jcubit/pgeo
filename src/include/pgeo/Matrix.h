@@ -22,7 +22,7 @@ namespace pgeo {
 
     public:
 
-
+        // evaluates to EngineType if it's an owning engine.
         using owning_engine_type        = support::get_owning_engine_type_t<EngineType>;
         using element_type              = typename EngineType::element_type;
         using reference                 = typename EngineType::reference;
@@ -331,8 +331,16 @@ namespace pgeo {
         constexpr EngineType&			engine() noexcept { return engine_; }
         constexpr EngineType const&	engine() const noexcept { return engine_; }
 
-        constexpr span_type			span() noexcept { return engine_.span(); }
-        constexpr const_span_type	span() const noexcept { return engine_.span(); }
+        constexpr span_type			span() noexcept
+        requires support::is_owning_engine_type_v<EngineType>
+        {
+            return engine_.span();
+        }
+        constexpr const_span_type	span() const noexcept
+        requires support::is_owning_engine_type_v<EngineType>
+        {
+            return engine_.span();
+        }
 
         // ------------------  Modifiers ------------------------------
 
@@ -362,8 +370,7 @@ namespace pgeo {
             matrix_engine<ET2>
         friend class Matrix;
 
-        /// This constructor allows to create submatrix views and transpose matrix views
-        /// It uses tag dispatch
+        /// This constructor allows to create submatrix views and transpose matrix views via tag dispatch
         template<typename ET2, typename ... ARGS>
         constexpr Matrix(detail::special_ctor_tag, ET2&& eng, ARGS&&... args)
         : engine_(std::forward<ET2>(eng), std::forward<ARGS>(args)...) {}

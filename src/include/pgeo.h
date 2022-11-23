@@ -34,12 +34,15 @@ namespace pgeo {
 
 } // namespace pgeo
 
-
+#include "pgeo/MDSpanSupport.h"
 #include "pgeo/MatrixEngineSupport.h"
 #include "pgeo/MatrixEngine.h"
 #include "pgeo/MatrixViewEngine.h"
 #include "pgeo/Matrix.h"
+
 #include "pgeo/Addition.h"
+#include "pgeo/Multiplication.h"
+#include "pgeo/Inverse.h"
 
 
 
