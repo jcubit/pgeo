@@ -18,10 +18,12 @@ target_sources(pgeoTest PRIVATE
         test_matrix_views.cpp
         test_vector.cpp
         test_addition.cpp
+        test_subtraction.cpp
         test_multiplication.cpp
         test_inverse.cpp
         test_point.cpp
         test_determinant.cpp
+        test_join_and_meet.cpp
         utilities.h
 )
 

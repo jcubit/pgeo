@@ -1,13 +1,13 @@
-#ifndef PGEOCL_ADDITION_H
-#define PGEOCL_ADDITION_H
+#ifndef PGEOCL_SUBSTRACTION_H
+#define PGEOCL_SUBSTRACTION_H
 
 #include <pgeo.h>
 
 namespace pgeo {
 
-    /// Matrix Addition
+    /// Matrix Substraction
     template<typename ET>
-    inline constexpr auto operator +(Matrix<ET> const& m1, Matrix<ET> const& m2) -> Matrix<ET>
+    inline constexpr auto operator -(Matrix<ET> const& m1, Matrix<ET> const& m2) -> Matrix<ET>
     {
         using size_type = typename Matrix<ET>::size_type;
 
@@ -27,7 +27,7 @@ namespace pgeo {
 
             for (;  jr < cols;  ++jr, ++j1, ++j2)
             {
-                result(ir, jr) = m1(i1, j1) + m2(i2, j2);
+                result(ir, jr) = m1(i1, j1) - m2(i2, j2);
             }
         }
 
@@ -38,4 +38,4 @@ namespace pgeo {
 } // namespace pgeo
 
 
-#endif //PGEOCL_ADDITION_H
+#endif //PGEOCL_SUBSTRACTION_H
