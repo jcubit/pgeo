@@ -91,19 +91,7 @@ namespace pgeo
             coordinates(rhs.coordinates);
             return *this;
         }
-
-//        // ------------------  Constructor from Points --------------------------------
-//        template <typename U, size_t M>
-//        requires std::is_convertible_v<U,element_type>
-//        constexpr Point(const Plane<U,M>& p1, const Plane<U,M>& p2, const Plane<U,M>& p3)
-//        {
-//            element_type x = determinant(p1.yzw(), p2.yzw(), p3.yzw());
-//            element_type y = -determinant(p1.xzw(), p2.xzw(), p3.xzw());
-//            element_type z = determinant(p1.xyw(), p2.xyw(), p3.xyw());
-//            element_type w = -determinant(p1.xyz(), p2.xyz(), p3.xyz());
-//
-//            coordinates = {x,y,z,w};
-//        }
+        
 
         // ------------------  Size --------------------------------
         constexpr size_type size() const noexcept
