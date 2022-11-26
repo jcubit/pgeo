@@ -5,7 +5,7 @@
 
 
 
-TEST(VectorTest, Constructors) {
+TEST(Vector, Constructors) {
 
     // list copy assignment
     pgeo::Vec3f v1 = {1.0f, 2.0f, 3.0f};
@@ -54,7 +54,7 @@ TEST(VectorTest, Constructors) {
 }
 
 
-TEST(VectorTest, ContainerConstructors) {
+TEST(Vector, ContainerConstructors) {
 
     // list copy assignment
     pgeo::Vec3f v1 = {1.0f, 2.0f, 3.0f};

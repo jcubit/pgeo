@@ -3,7 +3,7 @@
 #include "pgeo.h"
 #include "utilities.h"
 
-TEST(MatrixTest, Addition) {
+TEST(Matrix, Addition) {
 
     pgeo::Mat2f m1 = {{1.0f, 2.0f},
                       {3.0f, 4.0f}};
@@ -38,9 +38,6 @@ TEST(CoVector, Addition) {
 
     // sut
     pgeo::CoVec3f v3 = v1 + v2;
-    print(v1, "v1");
-    print(v2, "v2");
-    print(v3, "v3");
 
     EXPECT_EQ(v3, pgeo::CoVec3f({0.0f, 4.0f, 0.0f}));
 }

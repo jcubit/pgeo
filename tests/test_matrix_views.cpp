@@ -12,7 +12,6 @@ TEST(Submatrix, copySubmatrix)
                       {1.0f, 2.0f, 3.0f, 1.0f}};
 
     pgeo::Mat3f m2 = m1.submatrix(0, 3, 0, 3);
-    print(m2);
 
     pgeo::Mat3f m = {{1.0f, 2.0f, 3.0f},
                       {1.0f, 2.0f, 3.0f},
@@ -50,14 +49,11 @@ TEST(MatrixTranspose, Size)
                                  {3.0f,4.0f},
                                  {5.0f,6.0f}};
 
-    print(m32, "m32 =");
-
     // sut
     EXPECT_EQ(m32.columns(), 2);
     EXPECT_EQ(m32.rows(), 3);
 
     pgeo::Mat<float,2,3> m23 = m32.t();
-    print(m23);
     // sut
     EXPECT_EQ(m23.columns(), 3);
     EXPECT_EQ(m23.rows(), 2);

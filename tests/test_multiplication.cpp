@@ -3,7 +3,7 @@
 #include "pgeo.h"
 #include "utilities.h"
 
-TEST(MatrixTest, Multiplication) {
+TEST(Matrix, Multiplication) {
 
     pgeo::Mat2f m1 = {{1.0f, 2.0f},
                       {3.0f, 4.0f}};

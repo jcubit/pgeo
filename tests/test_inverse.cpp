@@ -3,7 +3,7 @@
 #include "pgeo.h"
 #include "utilities.h"
 
-TEST(MatrixTest, Inverse) {
+TEST(Matrix, Inverse) {
 
     float zNear = 0.01f;
     float zFar = 1000;
