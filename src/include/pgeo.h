@@ -44,6 +44,13 @@ namespace pgeo {
 #include "pgeo/Multiplication.h"
 #include "pgeo/Inverse.h"
 
+#include "pgeo/PointSupport.h"
+#include "pgeo/Determinant.h"
+#include "pgeo/Point.h"
+#include "pgeo/Plane.h"
+#include "pgeo/Join.h"
+
+
 
 
 
