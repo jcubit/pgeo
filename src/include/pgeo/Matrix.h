@@ -52,12 +52,12 @@ namespace pgeo {
         constexpr Matrix(Matrix&&) noexcept = default;
 
         // Copy constructor
-        constexpr Matrix(Matrix const&) = default;
+        constexpr Matrix(const Matrix &) = default;
 
         /// constructor from different engine, but constructible from
         /// the current engine
         template <typename EngineType2>
-        constexpr Matrix(Matrix<EngineType2> const& src)
+        constexpr Matrix(const Matrix<EngineType2> & src)
         requires
             mutable_matrix_engine<EngineType>
             and
@@ -67,7 +67,7 @@ namespace pgeo {
         /// Constructor from different engine and not constructible from
         /// the current engine
         template <typename EngineType2>
-        constexpr Matrix(Matrix<EngineType2> const& src)
+        constexpr Matrix(const Matrix<EngineType2> & src)
         requires
             mutable_matrix_engine<EngineType>
             and
@@ -445,21 +445,6 @@ namespace pgeo {
     using CoVec2d = CoVec<double,2>;
     using CoVec3d = CoVec<double,3>;
     using CoVec4d = CoVec<double,4>;
-
-
-//
-//    template<class T, size_t R, class COT = void>
-//    using fixed_size_column_vector =
-//            matrix<matrix_storage_engine<T, R, 1, void, matrix_layout::column_major>, COT>;
-//
-//    template<class T, size_t C, class COT = void>
-//    using fixed_size_row_vector =
-//            matrix<matrix_storage_engine<T, 1, C, void, matrix_layout::row_major>, COT>;
-//
-//
-//    template<class T, size_t R, size_t C, class A = std::allocator<T>, class COT = void>
-//    using general_matrix =
-//            matrix<matrix_storage_engine<T, R, C, A, matrix_layout::row_major>, COT>;
 
 
     // -------------- Equality Comparison ------------------------------------------------------
