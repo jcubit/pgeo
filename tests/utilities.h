@@ -15,6 +15,17 @@ void print(const pgeo::Mat<T,R,C,L>& m, std::string message = "")
     spdlog::info(message + "{}", std::move(m));
 }
 
+template <typename T, size_t N>
+void print(const pgeo::Point<T,N>& point, std::string message = "")
+{
+    spdlog::info(message + "{}", std::move(point.coordinates));
+}
+
+template <typename T, size_t N>
+void print(const pgeo::Plane<T,N>& plane, std::string message = "")
+{
+    spdlog::info(message + "{}", std::move(plane.coordinates));
+}
 
 
 
