@@ -20,6 +20,8 @@ target_sources(pgeoTest PRIVATE
         test_addition.cpp
         test_multiplication.cpp
         test_inverse.cpp
+        test_point.cpp
+        test_determinant.cpp
         utilities.h
 )
 
