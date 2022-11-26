@@ -36,10 +36,6 @@ namespace pgeo
                 return transpose_mdspan_type(s.data(), mapping, Accessor());
             }
 
-
-
-
-
         }; // struct mdspan_view_traits
 
 
