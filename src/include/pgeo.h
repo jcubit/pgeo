@@ -41,6 +41,7 @@ namespace pgeo {
 #include "pgeo/Matrix.h"
 
 #include "pgeo/Addition.h"
+#include "pgeo/Subtraction.h"
 #include "pgeo/Multiplication.h"
 #include "pgeo/Inverse.h"
 
