@@ -29,7 +29,6 @@ namespace pgeo {
         using const_reference           = typename EngineType::const_reference;
         using size_type                 = typename EngineType::size_type;
 
-        // TODO: does there exist a matrix which does not have a span, e.g. should view matrices have spans?
         using span_type					= typename EngineType::span_type;
         using const_span_type			= typename EngineType::const_span_type;
 
@@ -156,7 +155,7 @@ namespace pgeo {
         constexpr Matrix& operator=(Matrix&&) noexcept = default;
 
         // copy assignment
-        constexpr Matrix& operator=(Matrix const&) = default;
+        constexpr Matrix& operator=(const Matrix &) = default;
 
         // Assignment directly from different engine
         template <typename EngineType2>

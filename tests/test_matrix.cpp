@@ -53,8 +53,6 @@ TEST(Matrix, Constructors) {
 
     // sut
     EXPECT_EQ(m10, m9);
-
-
 }
 
 TEST(Matrix, Span)
