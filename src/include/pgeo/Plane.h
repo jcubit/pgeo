@@ -5,9 +5,7 @@
 
 namespace pgeo
 {
-    // TODO: Add Point Concept: It has Vec<T,N> as coordinates and N > 1
-
-    // Points store coordinates in a column vector
+    /// Plane in homogeneous coordinates
     template<typename T, size_t N>
     requires valid_point_size<N>
     class Plane {
@@ -42,6 +40,24 @@ namespace pgeo
 
         // copy assignment
         constexpr Plane& operator=(Plane const&) = default;
+
+        template<typename U>
+        requires
+            valid_matrix_elements<U>
+            and
+            at_least_size_four<N>
+            and
+            std::convertible_to<U, element_type>
+        constexpr Plane(U x, U y, U z, U w)
+        : coordinates({x,y,z,w}) {}
+
+        template<typename U, size_t M>
+        requires
+        at_least_size_four<N>
+        and
+        std::convertible_to<U, element_type>
+        constexpr Plane(const CoVec<U,4>& src)
+        : coordinates(src) {}
 
         // Constructor from Point with different type
         template<typename U, size_t M>
