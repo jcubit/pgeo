@@ -64,25 +64,15 @@ TEST(Determinant, ThreeVectors) {
 }
 
 
-//TEST(Determinant, FourByFour) {
-//
-//    float zNear = 0.01f;
-//    float zFar = 1000;
-//
-//
-//    pgeo::Mat4f m1 = {{1.f, 0.f,      0.f,                       0.f       },
-//                      {0.f, 1.f,      0.f,                       0.f       },
-//                      {0.f, 0.f,      0.f,                      -1.f       },
-//                      {0.f, 0.f, 1.f / zFar - 1.f / zNear,      1.f / zNear}};
-//
-//    pgeo::Mat4f m1_inv = {{1.f, 0.f,      0.f,                       0.f       },
-//                          {0.f, 1.f,      0.f,                       0.f       },
-//                          {0.f, 0.f,  -zFar / (zFar -zNear),   -(zFar * zNear) / (zFar - zNear)},
-//                          {0.f, 0.f,     -1.f,                      0.f}};
-//
-//
-//    float sut = pgeo::determinant(m1);
-//
-//    EXPECT_EQ(sut, m1_inv);
-//
-//}
+TEST(Determinant, FourByFourWithLinearDependentVector) {
+
+
+    pgeo::Vec4f col1 = {1.f, 0.f, 0.f, 1.f};
+    pgeo::Vec4f col2 = {-1.f, 0.f, 0.f, 1.f};
+    pgeo::Vec4f col3 = {0.f, 1.f, 0.f, 1.f};
+    pgeo::Vec4f col4 = {0.f, 0.5f, 0.f, 1.f};
+
+    float sut = pgeo::determinant(col1, col2, col3, col4);
+
+    EXPECT_FLOAT_EQ(sut, 0);
+}
