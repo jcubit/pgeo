@@ -81,7 +81,6 @@ namespace pgeo {
         }
 
 
-        // TODO: Do we need this? consider removing
         // ------------------  Modifiers  --------------------------------
         constexpr void          swap(MatrixViewEngine& rhs) noexcept
         {
@@ -171,7 +170,6 @@ namespace pgeo {
             return (*pReferentEngine_)(rowStart_ + i, colStart_ + j);
         }
 
-        // TODO: Do we need this? consider removing
         // ------------------  Modifiers  --------------------------------
         constexpr void          swap(MatrixViewEngine& rhs) noexcept
         {
@@ -262,7 +260,6 @@ namespace pgeo {
             return (*pReferentEngine_)(j, i);
         }
 
-        // TODO: Do we need this? consider removing
         // ------------------  Modifiers  --------------------------------
         constexpr void          swap(MatrixViewEngine& rhs) noexcept
         {
@@ -349,7 +346,6 @@ namespace pgeo {
         }
 
 
-        // TODO: Do we need this? consider removing
         // ------------------  Modifiers  --------------------------------
         constexpr void          swap(MatrixViewEngine& rhs) noexcept
         {
