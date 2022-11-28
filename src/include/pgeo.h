@@ -50,6 +50,7 @@ namespace pgeo {
 #include "pgeo/Point.h"
 #include "pgeo/Plane.h"
 #include "pgeo/Join.h"
+#include "pgeo/Line.h"
 
 
 

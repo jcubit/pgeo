@@ -22,8 +22,10 @@ target_sources(pgeoTest PRIVATE
         test_multiplication.cpp
         test_inverse.cpp
         test_point.cpp
+        test_plane.cpp
         test_determinant.cpp
         test_join_and_meet.cpp
+        test_line.cpp
         utilities.h
 )
 

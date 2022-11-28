@@ -12,19 +12,27 @@
 template <typename T, size_t R, size_t C, typename L>
 void print(const pgeo::Mat<T,R,C,L>& m, std::string message = "")
 {
-    spdlog::info(message + "{}", std::move(m));
+    spdlog::info(message + "{}", m);
 }
 
 template <typename T, size_t N>
 void print(const pgeo::Point<T,N>& point, std::string message = "")
 {
-    spdlog::info(message + "{}", std::move(point.coordinates));
+    spdlog::info(message + "{}", point.coordinates);
 }
 
 template <typename T, size_t N>
 void print(const pgeo::Plane<T,N>& plane, std::string message = "")
 {
-    spdlog::info(message + "{}", std::move(plane.coordinates));
+    spdlog::info(message + "{}", plane.coordinates);
+}
+
+template <typename T>
+void print(const pgeo::Line3<T>& line, std::string message = "")
+{
+    print(line.p, "line.p");
+    print(line.q, "line.q");
+    print(line.covariant(), "line covariant form");
 }
 
 

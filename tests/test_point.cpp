@@ -67,5 +67,38 @@ TEST(Point, MoveConstructorAndAssignment) {
 
 }
 
+TEST(Point, 4DVectorConstructor)
+{
+    pgeo::Vec4f v = {1.f,2.f,3.f,1.0f};
+    pgeo::Point3f p(v);
+    pgeo::Point3f q({1.f,2.f,3.f,1.f});
+
+    // sut
+    EXPECT_EQ(p, q);
+
+}
+
+TEST(Point, 4DConstructor)
+{
+    pgeo::Point3f p(1.f,2.f,3.f,4.f);
+    pgeo::Point3f q({1.f,2.f,3.f,4.f});
+
+    // sut
+    EXPECT_EQ(p, q);
+
+}
+
+TEST(Point, ElementAccess)
+{
+    pgeo::Point3f p(1.f,2.f,3.f,4.f);
+
+    // mut
+    EXPECT_FLOAT_EQ(p(0), 1.f);
+    EXPECT_FLOAT_EQ(p(1), 2.f);
+    EXPECT_FLOAT_EQ(p(2), 3.f);
+    EXPECT_FLOAT_EQ(p(3), 4.f);
+
+}
+
 
 
