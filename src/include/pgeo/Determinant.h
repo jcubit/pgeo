@@ -44,6 +44,28 @@ namespace pgeo
         return a + b + c;
     }
 
+    /// 4x4 Matrix Determinant
+    template<one_dimensional_matrix VectorType>
+    inline constexpr auto determinant(VectorType v1, VectorType v2, VectorType v3, VectorType v4) -> typename VectorType::element_type
+    {
+        using element_type = typename VectorType::element_type;
+
+        element_type a =  v1(0) * determinant(Vec<element_type,3>({v2(1),v2(2),v2(3)}),
+                                              Vec<element_type,3>({v3(1),v3(2),v3(3)}),
+                                              Vec<element_type,3>({v4(1),v4(2),v4(3)}));
+        element_type b = -v1(1) * determinant(Vec<element_type,3>({v2(0),v2(2),v2(3)}),
+                                              Vec<element_type,3>({v3(0),v3(2),v3(3)}),
+                                              Vec<element_type,3>({v4(0),v4(2),v4(3)}));
+        element_type c =  v1(2) * determinant(Vec<element_type,3>({v2(0),v2(1),v2(3)}),
+                                              Vec<element_type,3>({v3(0),v3(1),v3(3)}),
+                                              Vec<element_type,3>({v4(0),v4(1),v4(3)}));
+        element_type d =  -v1(3) * determinant(Vec<element_type,3>({v2(0),v2(1),v2(2)}),
+                                               Vec<element_type,3>({v3(0),v3(1),v3(2)}),
+                                               Vec<element_type,3>({v4(0),v4(1),v4(2)}));
+
+        return a + b + c + d;
+    }
+
 } // namespace pgeo
 
 #endif //PGEOCL_DETERMINANT_H
