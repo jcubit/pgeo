@@ -6,88 +6,91 @@
 namespace pgeo
 {
     /// Points in homogeneous coordinates
-    template<typename T, size_t N>
-    requires valid_point_size<N>
-    class Point {
+    template<typename MatrixType>
+    requires
+        coordinate_type<MatrixType>
+        and
+        match_coordinate_type_v<MatrixType,4>
+    class Point3 {
 
     public:
 
-        /// homogeneous coordinates of a point
-        Vec<T,N>                        coordinates;
-
-        /// Euclidean dimension
-        static constexpr size_t     dimension   = N-1;
-
-        using element_type    = T;
+        using coordinate_type = MatrixType;
+        using element_type    = typename MatrixType::element_type;
         using reference       = element_type&;
         using const_reference = element_type const&;
-        using size_type       = size_t;
+        using size_type       = typename MatrixType::size_type;
+
+
+        /// Number of homogeneous coordinates
+        static constexpr size_type    coordinates_size   = support::matrix_attributes<MatrixType>::size();
+        /// Euclidean dimension
+        static constexpr size_type    dimension   = coordinates_size - 1;
+
+        /// homogeneous coordinates of a point
+        coordinate_type                        coordinates;
 
         // destructor
-        ~Point() noexcept = default;
+        ~Point3() noexcept = default;
 
         // default constructor
-        constexpr Point() = default;
+        constexpr Point3() = default;
 
         // move constructor
-        constexpr Point(Point&&) noexcept = default;
+        constexpr Point3(Point3&&) noexcept = default;
 
         // Copy constructor
-        constexpr Point(Point const&) = default;
+        constexpr Point3(Point3 const&) = default;
 
         // move assignment
-        constexpr Point& operator=(Point&&) noexcept = default;
+        constexpr Point3& operator=(Point3&&) noexcept = default;
 
         // copy assignment
-        constexpr Point& operator=(Point const&) = default;
+        constexpr Point3& operator=(Point3 const&) = default;
 
 
         template<typename U>
         requires
             valid_matrix_elements<U>
             and
-            at_least_size_four<N>
-            and
             std::convertible_to<U, element_type>
-        constexpr Point(U x, U y, U z, U w)
+        constexpr Point3(U x, U y, U z, U w)
         : coordinates({ x, y, z, w}) {}
 
         template<typename U, size_t M>
         requires
-            at_least_size_four<N>
-            and
             std::convertible_to<U, element_type>
-        constexpr Point(const Vec<U,4>& src)
+        constexpr Point3(const Vec<U,4>& src)
         : coordinates(src) {}
 
 
         // Constructor from Point with different type
-        template<typename U, size_t M>
-        constexpr Point(const Point<U,M>& src)
+        template<typename MT2>
+        constexpr Point3(const Point3<MT2>& src)
         requires
-        (not support::sizes_differ<M,N>)
-        and
-        std::convertible_to<U, element_type>
-                : coordinates(src.coordinates) {}
+            is_point3_coordinates<MT2>
+            and
+            std::convertible_to<typename MT2::element_type, element_type>
+        : coordinates(src.coordinates) {}
 
 
         // Constructors from std::array or std::vector
         template<typename Container>
-        constexpr explicit Point(const Container& src)
-                :   coordinates(src) {}
+        constexpr explicit Point3(const Container& src)
+        :   coordinates(src) {}
 
         // Constructor from initialization list
         template<typename U>
-        constexpr Point(std::initializer_list<U> src)
+        constexpr Point3(std::initializer_list<U> src)
                 :   coordinates(src) {}
 
         // Assignment from Point with different type
-        template <typename U, size_t M>
-        constexpr Point& operator=(Point<U,M> const& rhs)
+        template <typename MT2>
+        constexpr Point3& operator=(Point3<MT2> const& rhs)
         requires
-        same_point_size<M,N>
-        and
-        std::convertible_to<U, element_type>
+            is_point3_coordinates<MT2>
+            and
+            std::convertible_to<typename MT2::element_type, element_type>
         {
             coordinates(rhs.coordinates);
             return *this;
@@ -95,7 +98,7 @@ namespace pgeo
 
         // Assignment with std::array or std::vector (with type conversion)
         template<typename Container>
-        constexpr Point& operator =(Container const& rhs)
+        constexpr Point3& operator =(Container const& rhs)
         {
             coordinates(rhs.coordinates);
             return *this;
@@ -103,7 +106,7 @@ namespace pgeo
 
         // Assignment from initialization list
         template<typename U>
-        constexpr Point& operator =(std::initializer_list<U> rhs)
+        constexpr Point3& operator =(std::initializer_list<U> rhs)
         {
             coordinates(rhs.coordinates);
             return *this;
@@ -113,7 +116,7 @@ namespace pgeo
         // ------------------  Size --------------------------------
         constexpr size_type size() const noexcept
         {
-            return N;
+            return coordinates_size;
         }
 
         constexpr size_type dim() const noexcept
@@ -135,36 +138,30 @@ namespace pgeo
         constexpr element_type x() const { return coordinates(0); }
 
         constexpr element_type y() const
-        requires at_least_size_three<N>
         { return coordinates(1); }
 
         constexpr element_type z() const
-        requires at_least_size_four<N>
         { return coordinates(2); }
 
         constexpr element_type w() const
         { return coordinates(dimension); }
 
-        constexpr Vec<T,3> xyz() const
-        requires at_least_size_four<N>
+        constexpr Vec<element_type ,3> xyz() const
         {
             return {coordinates(0), coordinates(1), coordinates(2)};
         }
 
-        constexpr Vec<T,3> yzw() const
-        requires at_least_size_four<N>
+        constexpr Vec<element_type ,3> yzw() const
         {
             return {coordinates(1), coordinates(2), coordinates(3)};
         }
 
-        constexpr Vec<T,3> xzw() const
-        requires at_least_size_four<N>
+        constexpr Vec<element_type ,3> xzw() const
         {
             return {coordinates(0), coordinates(2), coordinates(3)};
         }
 
-        constexpr Vec<T,3> xyw() const
-        requires at_least_size_four<N>
+        constexpr Vec<element_type ,3> xyw() const
         {
             return {coordinates(0), coordinates(1), coordinates(3)};
         }
@@ -181,29 +178,33 @@ namespace pgeo
     }; // class Point
 
     template <typename T>
-    using Point3 = Point<T,4>;
+    using Point3Base = Point3<Vec<T,4>>;
 
-    using Point3i = Point3<int32_t>;
-    using Point3f = Point3<float>;
-    using Point3d = Point3<double>;
+    using Point3i = Point3Base<int32_t>;
+    using Point3f = Point3Base<float>;
+    using Point3d = Point3Base<double>;
 
 
     // -------------- Equality Comparison ------------------------------------------------------
 
-    template <typename T, size_t N, typename U, size_t M>
-    constexpr bool operator==(Point<T,N> const& lhs, Point<U,M> const& rhs)
+    template <typename ET1, typename ET2>
+    constexpr bool operator==(Point3<ET1> const& lhs, Point3<ET2> const& rhs)
     {
-        Point<T,N> to_be_normalized_lhs = lhs;
-        Point<T,N> to_be_normalized_rhs = rhs;
+        Point3<ET1> to_be_normalized_lhs = lhs;
+        Point3<ET2> to_be_normalized_rhs = rhs;
         to_be_normalized_lhs.normalize();
         to_be_normalized_rhs.normalize();
         return to_be_normalized_lhs.coordinates == to_be_normalized_rhs.coordinates;
     }
 
-    template <typename T, size_t N, typename U, size_t M>
-    constexpr bool operator!=(Point<T,N> const& lhs, Point<U,M> const& rhs)
+    template <typename ET1, typename ET2>
+    constexpr bool operator!=(Point3<ET1> const& lhs, Point3<ET2> const& rhs)
     {
-        return !(lhs.coordinates == rhs.coordinates);
+        Point3<ET1> to_be_normalized_lhs = lhs;
+        Point3<ET2> to_be_normalized_rhs = rhs;
+        to_be_normalized_lhs.normalize();
+        to_be_normalized_rhs.normalize();
+        return !(to_be_normalized_lhs.coordinates == to_be_normalized_rhs.coordinates);
     }
 
 
