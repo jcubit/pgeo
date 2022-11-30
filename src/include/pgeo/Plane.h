@@ -189,7 +189,11 @@ namespace pgeo
     template <typename T, size_t N, typename U, size_t M>
     constexpr bool operator==(Plane<T,N> const& lhs, Plane<U,M> const& rhs)
     {
-        return lhs.coordinates == rhs.coordinates;
+        Plane<T,N> to_be_normalized_lhs = lhs;
+        Plane<T,N> to_be_normalized_rhs = rhs;
+        to_be_normalized_lhs.normalize();
+        to_be_normalized_rhs.normalize();
+        return to_be_normalized_lhs.coordinates == to_be_normalized_rhs.coordinates;
     }
 
     template <typename T, size_t N, typename U, size_t M>
