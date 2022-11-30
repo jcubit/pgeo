@@ -67,7 +67,7 @@ TEST(Plane, MoveConstructorAndAssignment) {
 
 }
 
-TEST(Plane, 4DCoVectorConstructor)
+TEST(Plane, FourDCoVectorConstructor)
 {
     pgeo::CoVec4f v = {1.f,2.f,3.f,1.0f};
     pgeo::Plane3f p(v);
@@ -78,7 +78,7 @@ TEST(Plane, 4DCoVectorConstructor)
 
 }
 
-TEST(Plane, 4DConstructor)
+TEST(Plane, FourDConstructor)
 {
     pgeo::Plane3f p(1.f,2.f,3.f,4.f);
     print(p,"p");
@@ -86,7 +86,6 @@ TEST(Plane, 4DConstructor)
 
     // sut
     EXPECT_EQ(p, q);
-
 }
 
 
