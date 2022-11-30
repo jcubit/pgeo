@@ -180,7 +180,7 @@ namespace pgeo
     using Plane3d = Plane3Base<double>;
 
 
-    // -------------- Equality Comparison ------------------------------------------------------
+    // -------------- Projective Equality Comparison ------------------------------------------------------
 
     template <typename MT1, typename MT2>
     constexpr bool operator==(Plane3<MT1> const& lhs, Plane3<MT2> const& rhs)

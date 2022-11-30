@@ -185,7 +185,7 @@ namespace pgeo
     using Point3d = Point3Base<double>;
 
 
-    // -------------- Equality Comparison ------------------------------------------------------
+    // -------------- Projective Equality Comparison ------------------------------------------------------
 
     template <typename ET1, typename ET2>
     constexpr bool operator==(Point3<ET1> const& lhs, Point3<ET2> const& rhs)
