@@ -29,6 +29,7 @@ target_sources(pgeo
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/include/pgeo/Addition.h>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/include/pgeo/Multiplication.h>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/include/pgeo/Inverse.h>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/include/pgeo/InnerProduct.h>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/include/pgeo/Determinant.h>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/include/pgeo/PointSupport.h>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/include/pgeo/Point.h>

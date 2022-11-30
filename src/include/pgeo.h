@@ -45,6 +45,7 @@ namespace pgeo {
 #include "pgeo/Subtraction.h"
 #include "pgeo/Multiplication.h"
 #include "pgeo/Inverse.h"
+#include "pgeo/InnerProduct.h"
 
 #include "pgeo/PointSupport.h"
 #include "pgeo/Determinant.h"
