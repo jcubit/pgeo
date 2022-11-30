@@ -14,6 +14,7 @@ namespace stdex = std::experimental;
 
 namespace pgeo {
 
+    // Matrix layout tags
     struct matrix_layout
     {
         struct row_major {};
