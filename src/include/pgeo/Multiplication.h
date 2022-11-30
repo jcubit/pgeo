@@ -10,7 +10,6 @@ namespace pgeo {
     requires (not ET::is_vector_or_covector)
     inline constexpr auto operator *(Matrix<ET> const& m1, Matrix<ET> const& m2) -> Matrix<ET>
     {
-        // TODO: throw exception if they are both vectors or covectors.
         using size_type = typename Matrix<ET>::size_type;
 
         size_type     rows  = m1.rows();

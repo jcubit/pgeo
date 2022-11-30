@@ -15,14 +15,14 @@ void print(const pgeo::Mat<T,R,C,L>& m, std::string message = "")
     spdlog::info(message + "{}", m);
 }
 
-template <typename T, size_t N>
-void print(const pgeo::Point<T,N>& point, std::string message = "")
+template <typename ET>
+void print(const pgeo::Point3<ET>& point, std::string message = "")
 {
     spdlog::info(message + "{}", point.coordinates);
 }
 
-template <typename T, size_t N>
-void print(const pgeo::Plane<T,N>& plane, std::string message = "")
+template <typename ET>
+void print(const pgeo::Plane3<ET>& plane, std::string message = "")
 {
     spdlog::info(message + "{}", plane.coordinates);
 }

@@ -14,6 +14,7 @@ namespace stdex = std::experimental;
 
 namespace pgeo {
 
+    // Matrix layout tags
     struct matrix_layout
     {
         struct row_major {};
@@ -44,6 +45,7 @@ namespace pgeo {
 #include "pgeo/Subtraction.h"
 #include "pgeo/Multiplication.h"
 #include "pgeo/Inverse.h"
+#include "pgeo/InnerProduct.h"
 
 #include "pgeo/PointSupport.h"
 #include "pgeo/Determinant.h"
