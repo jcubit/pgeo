@@ -25,7 +25,7 @@ namespace pgeo {
                                                || std::is_same_v<L, matrix_layout::column_major>);
 
 
-    /// We only consider arithmetic types for the moment.
+    /// We only consider arithmetic types for the moment (bool, ints, float precision)
     /// We can add later complex numbers with their respective conjugate/hermitian operations
     template <typename T>
     concept valid_matrix_elements = std::is_arithmetic_v<T>;
@@ -107,6 +107,10 @@ namespace pgeo {
     template <typename ET>
     concept matrix_engine = sizable_engine<ET> and engine_has_valid_2d_const_subscript<ET>;
 
+    /// Immutable vector engine
+    template <typename ET>
+    concept vector_or_covector_engine = sizable_engine<ET> and engine_has_valid_1d_const_subscript<ET>;
+
 
     /// Mutable matrix engine
     template <typename ET>
@@ -115,6 +119,7 @@ namespace pgeo {
     and
     engine_has_valid_2d_mutable_subscript<ET>;
 
+    /// Mutable vector engine
     template<typename ET>
     concept mutable_vector_or_covector_engine =
     mutable_matrix_engine<ET>
