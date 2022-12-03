@@ -54,3 +54,19 @@ TEST(Matrix, linearCombination) {
     EXPECT_EQ(m3, pgeo::Mat2f({{2.75f, 3.0f},
                                {4.5f, 10.25f}}));
 }
+
+TEST(Matrix, MatrixVectorMultiplication) {
+
+    pgeo::Mat2f m = {{1.0f, 2.0f},
+                      {3.0f, 4.0f}};
+
+    pgeo::Vec2f v = {1.0f, -2.0f};
+
+    // MUT
+    pgeo::Vec2f result = m*v;
+    print(result);
+
+    EXPECT_EQ(result, pgeo::Vec2f({-3.f, -5.f}));
+
+
+}
