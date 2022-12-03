@@ -28,6 +28,7 @@ target_sources(pgeoTest PRIVATE
         test_line.cpp
         test_inner_product.cpp
         test_side_wrap.cpp
+        test_intersection.cpp
         utilities.h
         common.h
 )

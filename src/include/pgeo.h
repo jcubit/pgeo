@@ -54,6 +54,7 @@ namespace pgeo {
 #include "pgeo/Join.h"
 #include "pgeo/Line.h"
 #include "pgeo/SideWrap.h"
+#include "pgeo/Intersection.h"
 
 
 
