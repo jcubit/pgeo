@@ -66,7 +66,6 @@ TEST(Determinant, ThreeVectors) {
 
 TEST(Determinant, FourByFourWithLinearDependentVector) {
 
-
     pgeo::Vec4f col1 = {1.f, 0.f, 0.f, 1.f};
     pgeo::Vec4f col2 = {-1.f, 0.f, 0.f, 1.f};
     pgeo::Vec4f col3 = {0.f, 1.f, 0.f, 1.f};
@@ -75,4 +74,22 @@ TEST(Determinant, FourByFourWithLinearDependentVector) {
     float sut = pgeo::determinant(col1, col2, col3, col4);
 
     EXPECT_FLOAT_EQ(sut, 0);
+}
+
+TEST(Determinant, FourByFourAffine) {
+
+    constexpr float PI = std::numbers::pi;
+    constexpr float theta = PI/4;
+    float cosTheta = std::cos(theta);
+    float sinTheta = std::sin(theta);
+
+    pgeo::Vec4f v1 = {cosTheta, -sinTheta, 0.f, 0.f};
+    pgeo::Vec4f v2 = {sinTheta, cosTheta, 0.f, 0.f};
+    pgeo::Vec4f v3 = {0.f, 0.f, 1.f, 0.f};
+    pgeo::Vec4f v4 = {0.f, 0.f, 0.f, 1.f};
+
+    // MUT
+    float scalar = pgeo::determinant(v1, v2, v3, v4);
+
+    EXPECT_FLOAT_EQ(scalar, 1.f);
 }

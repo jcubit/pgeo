@@ -53,6 +53,7 @@ namespace pgeo {
 #include "pgeo/Plane.h"
 #include "pgeo/Join.h"
 #include "pgeo/Line.h"
+#include "pgeo/SideWrap.h"
 
 
 

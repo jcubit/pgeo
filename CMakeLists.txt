@@ -36,6 +36,7 @@ target_sources(pgeo
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/include/pgeo/Plane.h>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/include/pgeo/Join.h>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/include/pgeo/Line.h>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/include/pgeo/SideWrap.h>
         )
 
 target_compile_features(pgeo

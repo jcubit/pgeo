@@ -26,7 +26,10 @@ target_sources(pgeoTest PRIVATE
         test_determinant.cpp
         test_join_and_meet.cpp
         test_line.cpp
+        test_inner_product.cpp
+        test_side_wrap.cpp
         utilities.h
+        common.h
 )
 
 target_link_libraries(pgeoTest
