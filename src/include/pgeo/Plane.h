@@ -55,11 +55,17 @@ namespace pgeo
         constexpr Plane3(U x, U y, U z, U w)
         : coordinates({x,y,z,w}) {}
 
-        template<typename U, size_t M>
+        template<typename U>
         requires
             std::convertible_to<U, element_type>
+        constexpr Plane3(const Vec<U,4>& src)
+        : coordinates(coordinate_type({src(0),src(1),src(2),src(3)})) {}
+
+        template<typename U>
+        requires
+        std::convertible_to<U, element_type>
         constexpr Plane3(const CoVec<U,4>& src)
-        : coordinates(src) {}
+                : coordinates(coordinate_type({src(0),src(1),src(2),src(3)})) {}
 
         // Constructor from Point with different type
         template<typename MT2>
