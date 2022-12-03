@@ -51,7 +51,7 @@ namespace pgeo
 
         }
 
-        constexpr Mat44<element_type> contraVariant() const
+        constexpr Mat44<element_type> contravariant() const
         {
             return std::initializer_list<std::initializer_list<element_type>>
                     {{         0           , p(3)*q(2) - p(2)*q(3), p(1)*q(3) - p(3)*q(1), p(2)*q(1) - p(1)*q(2)},

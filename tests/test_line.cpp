@@ -54,7 +54,7 @@ TEST(Line, GrassmannPlueckerRelation)
     pgeo::Line3f line(p,q);
 
     pgeo::Mat4f covariantLine = line.covariant();
-    pgeo::Mat4f contravariantLine = line.contraVariant();
+    pgeo::Mat4f contravariantLine = line.contravariant();
 
     // Invariant Test
     float invariant = pgeo::innerProduct(covariantLine, contravariantLine);
