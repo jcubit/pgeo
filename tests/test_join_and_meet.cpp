@@ -4,7 +4,7 @@
 #include "utilities.h"
 
 
-TEST(Point, Meet) {
+TEST(meet, FromThreePlanes) {
 
     pgeo::Plane3f a1 = {0,-1,0,1};
     pgeo::Plane3f a2 = {1,0,0,0};
@@ -16,7 +16,7 @@ TEST(Point, Meet) {
     EXPECT_EQ(p, pgeo::Point3f({0,1,0,1}));
 }
 
-TEST(Join, EvenPermutationKeepsOrientation) {
+TEST(join, EvenPermutationKeepsOrientation) {
 
     pgeo::Point3f p0 = { -0.5f, -0.5f, -0.5f, 1.f};
     pgeo::Point3f p4 = { -0.5f, -0.5f,  0.5f, 1.f};
@@ -46,7 +46,7 @@ TEST(Join, EvenPermutationKeepsOrientation) {
     EXPECT_EQ(a.xyz(), n_d);
 }
 
-TEST(Join, OddPermutationFlipsOrientation) {
+TEST(join, OddPermutationFlipsOrientation) {
 
     pgeo::Point3f p0 = { -0.5f, -0.5f, -0.5f, 1.f};
     pgeo::Point3f p4 = { -0.5f, -0.5f,  0.5f, 1.f};
@@ -63,7 +63,7 @@ TEST(Join, OddPermutationFlipsOrientation) {
     EXPECT_EQ(a.xyz(), n_d);
 }
 
-TEST(Point, JoinFace1) {
+TEST(join, JoinFace1FromPoints) {
 
     pgeo::Point3f p0 = {0.5f,-0.5f,-0.5f,1.f};
     pgeo::Point3f p4 = {0.5f, 0.5f,-0.5f,1.f};
@@ -77,7 +77,7 @@ TEST(Point, JoinFace1) {
     EXPECT_EQ(a, b);
 }
 
-TEST(Point, JoinFace2) {
+TEST(join, JoinFace2FromPoints) {
 
     pgeo::Point3f p1 = {0.5f,-0.5f,-0.5f,1.f};
     pgeo::Point3f p3 = {0.5f, 0.5f,-0.5f,1.f};

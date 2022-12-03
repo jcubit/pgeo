@@ -15,6 +15,12 @@ namespace pgeo {
         return line.covariant() * q;
     }
 
+    template <typename MT>
+    constexpr auto join(const Line3<MT>& line, const Point3<MT>& point) -> Plane3<detail::get_dual_type_t<MT>>
+    {
+        return line.contravariant() * point.coordinates;
+    }
+
 }
 
 #endif //PGEOCL_INTERSECTION_H
