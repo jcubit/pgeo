@@ -17,13 +17,9 @@ namespace pgeo {
         size_type     cols  = m2.columns();
         element_type  result{};
 
-
-        size_type     i = 0;
-        size_type     j  = 0;
-
-        for (;  i < rows;  ++i)
+        for (size_type  i = 0;  i < rows;  ++i)
         {
-            for (;  j < cols;  ++j)
+            for (size_type  j = 0;  j < cols;  ++j)
             {
                 result += (m1(i, j) * m2(i, j));
             }
